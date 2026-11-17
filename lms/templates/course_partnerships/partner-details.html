@@ -7,9 +7,19 @@
     from django.utils.translation import gettext as _
     from openedx.core.djangolib.markup import clean_dangerous_html, HTML, Text
     from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+    from django.conf import settings
 %>
 <%block name="pagetitle">${partner.name}</%block>
 <%block name="bodyclass">view-partner-details</%block>
+<%
+    ## Same pattern the footer uses for Start a Campus: the extension MFE's base is a
+    ## Django setting, so this works in dev (where the MFE serves itself on its own
+    ## port) and in production (where Caddy serves it on the main host) without the
+    ## template knowing which. If it is unset the button is not shown, rather than
+    ## linking somewhere wrong.
+    extension_base = (getattr(settings, 'EXTENSION_BASE_URL', None) or '').rstrip('/')
+    classroom_url = (extension_base + '/classroom') if extension_base else None
+%>
 <link rel="stylesheet" href="${static.url('custom_css/slick-theme.css')}" />
 <link rel="stylesheet" href="${static.url('custom_css/slick.css')}" />
 <link rel="stylesheet" href="${static.url('custom_css/partners.css')}" />
@@ -35,6 +45,18 @@
                     ${clean_dangerous_html(partner.content)}
                 </div>
             </div>
+            % if classroom_url:
+                <div class="classroom-cta-row">
+                    <div class="classroom-cta-text">
+                        <h3 class="classroom-cta-title">${_("Studying together in a live class?")}</h3>
+                        <p class="classroom-cta-help">${_("If your teacher gave you a code, join here. Teachers can start a class and share the code with their students.")}</p>
+                    </div>
+                    <div class="classroom-cta-actions">
+                        <a class="classroom-cta" href="${classroom_url}">${_("Join a live class")}</a>
+                        <a class="classroom-cta classroom-cta--secondary" href="${classroom_url}?teach=1">${_("Start a class")}</a>
+                    </div>
+                </div>
+            % endif
         </div>
         <%include file="_course_creators.html" />
         % if centers:

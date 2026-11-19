@@ -58,7 +58,9 @@
             % if categories:
                 % for category in categories:
                     <%
-                        courses = CourseOverview.objects.filter(enhancedcourse__category=category, enhancedcourse__partner=partner)
+                        courses = CourseOverview.objects.filter(
+                            enhancedcourse__category=category, enhancedcourse__partner=partner
+                        ).order_by("enhancedcourse__display_order", "display_name", "id")
                     %>
                     <div class="category-inner">
                         <h2 class="category-title">${category.name}</h2>
